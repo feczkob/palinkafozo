@@ -15,8 +15,7 @@ HEATER_1.off()
 HEATER_2.off()
 HEATER_3.off()
 
-interrupt_flag = 0
-buttons_adc = 1024
+buttons_adc = 0
 debounce_time = 0
 
 roms = DS_SENSOR.scan()
@@ -74,11 +73,17 @@ def print_heater_status(target_temp, measured_temp, mode, heaters):
     screen_target_temp = target_temp
     screen_measured_temp = measured_temp
     screen_mode = mode
+    screen_mix = mix
     screen_heater_status = heaters.copy()
     
     display.ClearScreenCursorHome()
-    display.WriteLine(f"S:{round(screen_target_temp, 1)}C  T:{round(screen_measured_temp, 1)}C", 1)
+    display.WriteLine(f"  {round(screen_target_temp, 1)}C    {round(screen_measured_temp, 1)}C", 1)
+    display.DrawCustomChar(line_number=1, col=1, slot=1)
+    display.DrawCustomChar(line_number=1, col=9, slot=2)
+    
     display.WriteLine(f"Mod:{screen_mode} Mix:{int(screen_mix)}  F:{sum(screen_heater_status)}", 2)
+    
+
 
 def buttons_callback(pin):
     global buttons_adc, debounce_time
@@ -118,6 +123,12 @@ def handle_buttons():
 # TODO rising or falling?
 #BUTTONS_PIN.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=buttons_callback)
 display.BackLightOn()
+# Load custom glyph (slot 0) once at startup
+display.CreateChar(slot=0, bitmap=RECTANGLE)
+display.CreateChar(slot=1, bitmap=CHAR_TARGET)
+display.CreateChar(slot=2, bitmap=CHAR_THERMOMETER)
+display.CreateChar(slot=3, bitmap=CHAR_HEATER_OFF)
+display.CreateChar(slot=4, bitmap=CHAR_HEATER_OFF)
 while True:
     try:
         measure_temperature()

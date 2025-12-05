@@ -121,3 +121,32 @@ class LCD16x2:
     # Cursor Off
     def CursorOff(self):
         self.WriteCommand(0x0C)
+
+    # Load a 5x8 bitmap into CGRAM slot (0-7)
+    # bitmap must be an iterable of up to 8 ints, each using only the lower 5 bits
+    def CreateChar(self, slot, bitmap):
+        # Ensure slot is 0..7
+        slot = slot & 0x07
+        # Set CGRAM address: 0x40 | (slot << 3) (8 bytes per glyph)
+        self.WriteCommand(0x40 | (slot << 3))
+        # Write 8 rows (pad with 0 if bitmap shorter)
+        for i in range(8):
+            b = bitmap[i] if i < len(bitmap) else 0
+            self.WriteData(b & 0x1F)
+        # Note: After writing CGRAM, the address pointer stays in CGRAM.
+        # Caller should set DDRAM address before writing normal characters.
+
+    # Draw a previously defined custom char (slot 0-7) at given 1-based line and 0-based column
+    def DrawCustomChar(self, line_number, col, slot):
+        # Clamp column to 1..16 for 16x2 displays
+        if col < 1:
+            col = 1
+        if col > 16:
+            col = 16
+        # Set DDRAM address based on line
+        if line_number == 1:
+            self.WriteCommand(0x80 + col - 1)  # Line 1 base
+        else:
+            self.WriteCommand(0xC0 + col - 1)  # Line 2 base
+        # Write the custom character code (0..7)
+        self.WriteData(slot & 0x07)
