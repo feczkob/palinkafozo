@@ -10,7 +10,8 @@ TARGET_TEMPERATURE = 23.0
 measured_temp: float = 0.0
 phase = 1
 mix = True
-heaters = [False, False, False]
+heaters_in_use = [False, False, False]
+heaters_allowed = [True, True, True]
 HEATER_1.off()
 HEATER_2.off()
 HEATER_3.off()
@@ -25,7 +26,7 @@ screen_target_temp = TARGET_TEMPERATURE
 screen_measured_temp = measured_temp
 screen_phase = phase
 screen_mix = mix
-screen_heater_status = heaters.copy()
+screen_heater_status = heaters_in_use.copy()
 
 def measure_temperature():   
     # TODO set precision?
@@ -37,20 +38,17 @@ def measure_temperature():
     measured_temp = measured
 
 def control_heaters():
-    global heaters, measured_temp, TARGET_TEMPERATURE
-    # TODO: later we can take the direction (heating or cooling) into account
+    global heaters_in_use, measured_temp, TARGET_TEMPERATURE
     if measured_temp < TARGET_TEMPERATURE:
-        heaters = [True, True, True]
-        HEATER_1.on()
-        HEATER_2.on()
-        HEATER_3.on()
-        # print("Heaters ON")
+        heaters_in_use = [True, True, True]
+        HEATER_1.value(heaters_in_use[0] & heaters_allowed[0])
+        HEATER_2.value(heaters_in_use[1] & heaters_allowed[1])
+        HEATER_3.value(heaters_in_use[2] & heaters_allowed[2])
     else:
-        heaters = [False, False, False]
+        heaters_in_use = [False, False, False]
         HEATER_1.off()
         HEATER_2.off()
         HEATER_3.off()
-        # print("Heaters OFF")
       
 def control_mixer():
     global mix
@@ -59,7 +57,7 @@ def control_mixer():
     else:
         MIXER_PIN.off() 
         
-def print_heater_status(target_temp, measured_temp, phase, heaters):
+def draw_to_lcd(target_temp, measured_temp, phase, heaters):
     # TODO: store the screen state locally and only update if something changes
     global screen_target_temp, screen_measured_temp, screen_phase, screen_mix, screen_heater_status
     
@@ -99,8 +97,6 @@ def print_heater_status(target_temp, measured_temp, phase, heaters):
     if(heaters[0]): display.DrawCustomChar(line_number=2, col=14, slot=3)
     if(heaters[1]): display.DrawCustomChar(line_number=2, col=15, slot=3)
     if(heaters[2]): display.DrawCustomChar(line_number=2, col=16, slot=3)
-    
-
 
 def buttons_callback(pin):
     global buttons_adc, debounce_time
@@ -115,11 +111,19 @@ def buttons_callback(pin):
         debounce_time = current_time  # Update last debounce time
 
 def handle_buttons():
-    global TARGET_TEMPERATURE, buttons_adc, phase, mix
+    global TARGET_TEMPERATURE, buttons_adc, phase, mix, heaters_allowed
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
     if 200 <= buttons_adc < 6000:
         # RIGHT
-        pass
+        print("RIGHT button pressed")
+        if(sum(heaters_allowed) == 3): 
+            print("All heaters already allowed")
+            heaters_allowed = [False, False, False]
+            sleep(0.3)  # Simple debounce
+            return
+        print("Enabling next heater")
+        heaters_allowed[sum(heaters_allowed)] = True
+        sleep(0.3)  # Simple debounce
     elif 6000 <= buttons_adc < 14000:
         # UP
         TARGET_TEMPERATURE += .1
@@ -136,6 +140,9 @@ def handle_buttons():
         # SELECT
         phase = (phase % 4) + 1
         sleep(0.3)  # Simple debounce
+
+def array_and(b1, b2):
+    return [a and b for a, b in zip(b1, b2)]
 
 # TODO rising or falling?
 #BUTTONS_PIN.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=buttons_callback)
@@ -155,7 +162,12 @@ while True:
         control_heaters()
         control_mixer()
         handle_buttons()
-        print_heater_status(TARGET_TEMPERATURE, measured_temp, phase, heaters)
+        draw_to_lcd(
+            TARGET_TEMPERATURE, 
+            measured_temp, 
+            phase, 
+            array_and(heaters_in_use, heaters_allowed)
+        )
         sleep(0.1)
     except KeyboardInterrupt:
         break
