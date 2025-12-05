@@ -110,11 +110,11 @@ def handle_buttons():
     elif 6000 <= buttons_adc < 14000:
         # UP
         TARGET_TEMPERATURE[phase - 1] += .1
-        print("Increased target temperature to:", TARGET_TEMPERATURE[phase - 1])
+        print("Increased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
     elif 14000 <= buttons_adc < 20000:
         # DOWN
         TARGET_TEMPERATURE[phase - 1] -= .1
-        print("Decreased target temperature to:", TARGET_TEMPERATURE[phase - 1])
+        print("Decreased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
     elif 20000 <= buttons_adc < 32000:
         # LEFT
         mix = not mix
