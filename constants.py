@@ -16,7 +16,7 @@ HEATER_2 = machine.Pin(8,machine.Pin.OUT)
 HEATER_3 = machine.Pin(9,machine.Pin.OUT)
 TEMPERATURE_PIN = machine.Pin(10)
 DS_SENSOR = ds18x20.DS18X20(onewire.OneWire(TEMPERATURE_PIN))
-BUTTONS_PIN = machine.Pin(26, machine.Pin.IN, machine.Pin.PULL_UP)
+BUTTONS_PIN = machine.Pin(27, machine.Pin.IN)
 BUTTONS_PIN_ADC = machine.ADC(BUTTONS_PIN)
 
 display = lcd_4bit_mode.LCD16x2(RS,ENABLE,BACK_LIGHT,D4,D5,D6,D7)
