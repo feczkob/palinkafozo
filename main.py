@@ -5,10 +5,10 @@ import time
 
 
 # Program state
-# TODO: make target dependent on mode
+# TODO: make target dependent on phase
 TARGET_TEMPERATURE = 80.0
 measured_temp: float = 0.0
-mode = 1
+phase = 1
 mix = True
 heaters = [False, False, False]
 HEATER_1.off()
@@ -19,12 +19,11 @@ buttons_adc = 0
 debounce_time = 0
 
 roms = DS_SENSOR.scan()
-print('Found DS devices: ', roms)
 
 # Screen state
 screen_target_temp = TARGET_TEMPERATURE
 screen_measured_temp = measured_temp
-screen_mode = mode
+screen_phase = phase
 screen_mix = mix
 screen_heater_status = heaters.copy()
 
@@ -60,28 +59,28 @@ def control_mixer():
     else:
         MIXER_PIN.off() 
         
-def print_heater_status(target_temp, measured_temp, mode, heaters):
+def print_heater_status(target_temp, measured_temp, phase, heaters):
     # TODO: store the screen state locally and only update if something changes
-    global screen_target_temp, screen_measured_temp, screen_mode, screen_heater_status
+    global screen_target_temp, screen_measured_temp, screen_phase, screen_heater_status
     
     if (screen_target_temp == target_temp and
         screen_measured_temp == measured_temp and
-        screen_mode == mode and
+        screen_phase == phase and
         screen_heater_status == heaters):
         return  # No changes, skip updating the display
     
     screen_target_temp = target_temp
     screen_measured_temp = measured_temp
-    screen_mode = mode
+    screen_phase = phase
     screen_mix = mix
     screen_heater_status = heaters.copy()
     
     display.ClearScreenCursorHome()
     display.WriteLine(f"  {round(screen_target_temp, 1)}C    {round(screen_measured_temp, 1)}C", 1)
     display.DrawCustomChar(line_number=1, col=1, slot=1)
-    display.DrawCustomChar(line_number=1, col=9, slot=2)
+    display.DrawCustomChar(line_number=1, col=10, slot=2)
     
-    display.WriteLine(f"Mod:{screen_mode} Mix:{int(screen_mix)}  F:{sum(screen_heater_status)}", 2)
+    display.WriteLine(f"Mod:{screen_phase} Mix:{int(screen_mix)}  F:{sum(screen_heater_status)}", 2)
     
 
 
@@ -98,7 +97,7 @@ def buttons_callback(pin):
         debounce_time = current_time  # Update last debounce time
 
 def handle_buttons():
-    global TARGET_TEMPERATURE, buttons_adc, mode, mix
+    global TARGET_TEMPERATURE, buttons_adc, phase, mix
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
     if 200 <= buttons_adc < 6000:
         # RIGHT
@@ -117,7 +116,7 @@ def handle_buttons():
         print("Mixing is now:", mix)
     elif 32000 <= buttons_adc < 40000:
         # SELECT
-        mode = (mode % 4) + 1
+        phase = (phase % 4) + 1
         sleep(0.3)  # Simple debounce
 
 # TODO rising or falling?
@@ -135,7 +134,7 @@ while True:
         control_heaters()
         control_mixer()
         handle_buttons()
-        print_heater_status(TARGET_TEMPERATURE, measured_temp, mode, heaters)
+        print_heater_status(TARGET_TEMPERATURE, measured_temp, phase, heaters)
         sleep(0.1)
     except KeyboardInterrupt:
         break
