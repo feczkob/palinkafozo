@@ -96,30 +96,15 @@ def draw_to_lcd(target_temp, measured_temp, phase, heaters):
     if(heaters[1]): display.DrawCustomChar(line_number=2, col=15, slot=3)
     if(heaters[2]): display.DrawCustomChar(line_number=2, col=16, slot=3)
 
-def buttons_callback(pin):
-    global buttons_adc, debounce_time
-    print("Button interrupt triggered")
-
-    current_time = time.ticks_ms()
-    
-    # Debounce check- only proceeds if 500ms has passed since the last trigger
-    if time.ticks_diff(current_time, debounce_time) > 500:
-        buttons_adc = BUTTONS_PIN_ADC.read_u16()
-        print("Value on BUTTON ADC:", buttons_adc)
-        debounce_time = current_time  # Update last debounce time
-
 def handle_buttons():
     global TARGET_TEMPERATURE, buttons_adc, phase, mix, heaters_allowed
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
     if 200 <= buttons_adc < 6000:
         # RIGHT
-        print("RIGHT button pressed")
         if(sum(heaters_allowed) == 3): 
-            print("All heaters already allowed")
             heaters_allowed = [False, False, False]
             sleep(0.3)  # Simple debounce
             return
-        print("Enabling next heater")
         heaters_allowed[sum(heaters_allowed)] = True
         sleep(0.3)  # Simple debounce
     elif 6000 <= buttons_adc < 14000:
@@ -142,8 +127,6 @@ def handle_buttons():
 def array_and(b1, b2):
     return [a and b for a, b in zip(b1, b2)]
 
-# TODO rising or falling?
-#BUTTONS_PIN.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=buttons_callback)
 display.BackLightOn()
 # Load custom glyph (slot 0) once at startup
 display.CreateChar(slot=0, bitmap=CHAR_MIX)
@@ -157,9 +140,9 @@ display.CreateChar(slot=7, bitmap=CHAR_MIX_OFF)
 while True:
     try:
         measure_temperature()
+        handle_buttons()
         control_heaters()
         control_mixer()
-        handle_buttons()
         draw_to_lcd(
             TARGET_TEMPERATURE[phase - 1], 
             measured_temp, 
