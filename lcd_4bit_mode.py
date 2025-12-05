@@ -93,6 +93,7 @@ class LCD16x2:
             self.WriteCommand(0xC0)
             for x in string:
                 self.WriteData(ord(x))    
+    
     # Clear Screen
     def ClearScreenCursorHome(self):
         self.WriteCommand(0x01)

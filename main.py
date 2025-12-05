@@ -5,9 +5,11 @@ import time
 
 
 # Program state
-TARGET_TEMPERATURE = 25.0
+# TODO: make target dependent on mode
+TARGET_TEMPERATURE = 80.0
 measured_temp: float = 0.0
 mode = 1
+mix = True
 heaters = [False, False, False]
 HEATER_1.off()
 HEATER_2.off()
@@ -23,7 +25,8 @@ print('Found DS devices: ', roms)
 # Screen state
 screen_target_temp = TARGET_TEMPERATURE
 screen_measured_temp = measured_temp
-screen_mode = 1
+screen_mode = mode
+screen_mix = mix
 screen_heater_status = heaters.copy()
 
 def measure_temperature():   
@@ -50,6 +53,13 @@ def control_heaters():
         HEATER_2.off()
         HEATER_3.off()
         # print("Heaters OFF")
+      
+def control_mixer():
+    global mix
+    if mix:
+        MIXER_PIN.on()
+    else:
+        MIXER_PIN.off() 
         
 def print_heater_status(target_temp, measured_temp, mode, heaters):
     # TODO: store the screen state locally and only update if something changes
@@ -68,7 +78,7 @@ def print_heater_status(target_temp, measured_temp, mode, heaters):
     
     display.ClearScreenCursorHome()
     display.WriteLine(f"S:{round(screen_target_temp, 1)}C  T:{round(screen_measured_temp, 1)}C", 1)
-    display.WriteLine(f"Mod:{screen_mode}    Futes:{sum(screen_heater_status)}", 2)
+    display.WriteLine(f"Mod:{screen_mode} Mix:{int(screen_mix)}  F:{sum(screen_heater_status)}", 2)
 
 def buttons_callback(pin):
     global buttons_adc, debounce_time
@@ -83,32 +93,27 @@ def buttons_callback(pin):
         debounce_time = current_time  # Update last debounce time
 
 def handle_buttons():
-    global TARGET_TEMPERATURE, buttons_adc, mode
+    global TARGET_TEMPERATURE, buttons_adc, mode, mix
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
     if 200 <= buttons_adc < 6000:
         # RIGHT
         pass
-    elif 6000 <= buttons_adc < 15000:
+    elif 6000 <= buttons_adc < 14000:
         # UP
         TARGET_TEMPERATURE += .1
         print("Increased target temperature to:", TARGET_TEMPERATURE)
-    elif 15000 <= buttons_adc < 20000:
+    elif 14000 <= buttons_adc < 20000:
         # DOWN
-        TARGET_TEMPERATURE -= 0.1
+        TARGET_TEMPERATURE -= .1
         print("Decreased target temperature to:", TARGET_TEMPERATURE)
     elif 20000 <= buttons_adc < 32000:
         # LEFT
-        mode = (mode + 1) % 4
-        sleep(0.3)  # Simple debounce
+        mix = not mix
+        print("Mixing is now:", mix)
     elif 32000 <= buttons_adc < 40000:
         # SELECT
-        pass
-    reset_buttons_adc()
-    
-def reset_buttons_adc():
-    # Reset buttons_adc to avoid repeated actions
-    global buttons_adc
-    buttons_adc = 1024
+        mode = (mode % 4) + 1
+        sleep(0.3)  # Simple debounce
 
 # TODO rising or falling?
 #BUTTONS_PIN.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=buttons_callback)
@@ -117,6 +122,7 @@ while True:
     try:
         measure_temperature()
         control_heaters()
+        control_mixer()
         handle_buttons()
         print_heater_status(TARGET_TEMPERATURE, measured_temp, mode, heaters)
         sleep(0.1)
