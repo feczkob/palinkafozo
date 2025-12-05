@@ -61,40 +61,39 @@ CHAR_THERMOMETER = [
     0b01110
 ]
 
-# Heater OFF icon (empty box)
-CHAR_HEATER_OFF = [
+# Heater ON icon (filled box with flame)
+CHAR_HEATER = [
+    0b00000,
     0b11111,
-    0b10001,
-    0b10001,
-    0b10001,
-    0b10001,
-    0b10001,
+    0b10101,
+    0b11011,
+    0b10101,
+    0b11011,
+    0b10101,
     0b11111,
-    0b00000
 ]
 
-# Heater ON icon (filled box with flame)
 CHAR_HEATER_ON = [
+    0b00000,
+    0b01010,
     0b11111,
     0b10101,
-    0b11011,
-    0b10101,
-    0b11011,
-    0b10101,
+    0b00000,
+    0b01010,
     0b11111,
-    0b00000
+    0b10101,
 ]
 
 # Mix ON icon (rotating arrows)
 CHAR_MIX_ON = [
     0b00100,
     0b01110,
-    0b10101,
-    0b00100,
-    0b10101,
+    0b11111,
+    0b11111,
+    0b11111,
+    0b11111,
     0b01110,
-    0b00100,
-    0b00000
+    0b00100
 ]
 
 # Mix OFF icon (static)
@@ -104,7 +103,30 @@ CHAR_MIX_OFF = [
     0b10001,
     0b10001,
     0b10001,
+    0b10001,
     0b01110,
-    0b00000,
     0b00000
+]
+
+CHAR_MIX = [
+    0b01111,
+    0b00111,
+    0b01101,
+    0b11000,
+    0b00011,
+    0b10110,
+    0b11100,
+    0b11110,
+]
+
+# Phase
+CHAR_PHASE = [
+    0b00100,
+    0b01010,
+    0b01010,
+    0b10001,
+    0b10001,
+    0b01010,
+    0b01010,
+    0b00100,
 ]

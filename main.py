@@ -6,7 +6,7 @@ import time
 
 # Program state
 # TODO: make target dependent on phase
-TARGET_TEMPERATURE = 80.0
+TARGET_TEMPERATURE = 23.0
 measured_temp: float = 0.0
 phase = 1
 mix = True
@@ -61,11 +61,12 @@ def control_mixer():
         
 def print_heater_status(target_temp, measured_temp, phase, heaters):
     # TODO: store the screen state locally and only update if something changes
-    global screen_target_temp, screen_measured_temp, screen_phase, screen_heater_status
+    global screen_target_temp, screen_measured_temp, screen_phase, screen_mix, screen_heater_status
     
     if (screen_target_temp == target_temp and
         screen_measured_temp == measured_temp and
         screen_phase == phase and
+        screen_mix == mix and
         screen_heater_status == heaters):
         return  # No changes, skip updating the display
     
@@ -77,10 +78,27 @@ def print_heater_status(target_temp, measured_temp, phase, heaters):
     
     display.ClearScreenCursorHome()
     display.WriteLine(f"  {round(screen_target_temp, 1)}C    {round(screen_measured_temp, 1)}C", 1)
+    # Target temperature
     display.DrawCustomChar(line_number=1, col=1, slot=1)
+    # Measured temperature
     display.DrawCustomChar(line_number=1, col=10, slot=2)
     
-    display.WriteLine(f"Mod:{screen_phase} Mix:{int(screen_mix)}  F:{sum(screen_heater_status)}", 2)
+    display.WriteLine(f" {screen_phase}", 2)
+    # Phase icon
+    display.DrawCustomChar(line_number=2, col=0, slot=5)
+    # Mixer icon
+    display.DrawCustomChar(line_number=2, col=8, slot=0)
+    # Mixer on/off
+    if(screen_mix):
+        display.DrawCustomChar(line_number=2, col=9, slot=6)
+    else:
+        display.DrawCustomChar(line_number=2, col=9, slot=7)
+    # Heater icon
+    display.DrawCustomChar(line_number=2, col=13, slot=4)
+    # Heaters on/off
+    if(heaters[0]): display.DrawCustomChar(line_number=2, col=14, slot=3)
+    if(heaters[1]): display.DrawCustomChar(line_number=2, col=15, slot=3)
+    if(heaters[2]): display.DrawCustomChar(line_number=2, col=16, slot=3)
     
 
 
@@ -113,7 +131,7 @@ def handle_buttons():
     elif 20000 <= buttons_adc < 32000:
         # LEFT
         mix = not mix
-        print("Mixing is now:", mix)
+        sleep(0.3)  # Simple debounce
     elif 32000 <= buttons_adc < 40000:
         # SELECT
         phase = (phase % 4) + 1
@@ -123,11 +141,14 @@ def handle_buttons():
 #BUTTONS_PIN.irq(trigger=Pin.IRQ_FALLING|Pin.IRQ_RISING, handler=buttons_callback)
 display.BackLightOn()
 # Load custom glyph (slot 0) once at startup
-display.CreateChar(slot=0, bitmap=RECTANGLE)
+display.CreateChar(slot=0, bitmap=CHAR_MIX)
 display.CreateChar(slot=1, bitmap=CHAR_TARGET)
 display.CreateChar(slot=2, bitmap=CHAR_THERMOMETER)
-display.CreateChar(slot=3, bitmap=CHAR_HEATER_OFF)
-display.CreateChar(slot=4, bitmap=CHAR_HEATER_OFF)
+display.CreateChar(slot=3, bitmap=CHAR_HEATER_ON)
+display.CreateChar(slot=4, bitmap=CHAR_HEATER)
+display.CreateChar(slot=5, bitmap=CHAR_PHASE)
+display.CreateChar(slot=6, bitmap=CHAR_MIX_ON)
+display.CreateChar(slot=7, bitmap=CHAR_MIX_OFF)
 while True:
     try:
         measure_temperature()
