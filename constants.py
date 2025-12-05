@@ -3,7 +3,6 @@ import lcd_4bit_mode
 import onewire
 import ds18x20
 
-# LCD Power Pins
 RS = machine.Pin(4,machine.Pin.OUT)
 ENABLE = machine.Pin(5,machine.Pin.OUT)
 BACK_LIGHT = machine.Pin(6,machine.Pin.OUT)
@@ -20,12 +19,18 @@ MIXER_PIN = machine.Pin(11, machine.Pin.OUT)
 BUTTONS_PIN = machine.Pin(27, machine.Pin.IN)
 BUTTONS_PIN_ADC = machine.ADC(BUTTONS_PIN)
 
+# TODO: actual values
+TARGET_PHASE_1 = 23.0
+TARGET_PHASE_2 = 26.0
+TARGET_PHASE_3 = 28.0
+TARGET_PHASE_4 = 30.0
+TARGET_TEMPERATURE = [TARGET_PHASE_1, TARGET_PHASE_2, TARGET_PHASE_3, TARGET_PHASE_4]
+
 display = lcd_4bit_mode.LCD16x2(RS,ENABLE,BACK_LIGHT,D4,D5,D6,D7)
 
 
 # Custom LCD characters (5x8 bitmaps)
 # Each byte represents one row, using only the lower 5 bits
-
 RECTANGLE = [
     0b11111,
     0b10001,

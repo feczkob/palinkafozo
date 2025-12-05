@@ -5,8 +5,6 @@ import time
 
 
 # Program state
-# TODO: make target dependent on phase
-TARGET_TEMPERATURE = 23.0
 measured_temp: float = 0.0
 phase = 1
 mix = True
@@ -22,7 +20,7 @@ debounce_time = 0
 roms = DS_SENSOR.scan()
 
 # Screen state
-screen_target_temp = TARGET_TEMPERATURE
+screen_target_temp = 0.0
 screen_measured_temp = measured_temp
 screen_phase = phase
 screen_mix = mix
@@ -39,7 +37,7 @@ def measure_temperature():
 
 def control_heaters():
     global heaters_in_use, measured_temp, TARGET_TEMPERATURE
-    if measured_temp < TARGET_TEMPERATURE:
+    if measured_temp < TARGET_TEMPERATURE[phase - 1]:
         heaters_in_use = [True, True, True]
         HEATER_1.value(heaters_in_use[0] & heaters_allowed[0])
         HEATER_2.value(heaters_in_use[1] & heaters_allowed[1])
@@ -126,12 +124,12 @@ def handle_buttons():
         sleep(0.3)  # Simple debounce
     elif 6000 <= buttons_adc < 14000:
         # UP
-        TARGET_TEMPERATURE += .1
-        print("Increased target temperature to:", TARGET_TEMPERATURE)
+        TARGET_TEMPERATURE[phase - 1] += .1
+        print("Increased target temperature to:", TARGET_TEMPERATURE[phase - 1])
     elif 14000 <= buttons_adc < 20000:
         # DOWN
-        TARGET_TEMPERATURE -= .1
-        print("Decreased target temperature to:", TARGET_TEMPERATURE)
+        TARGET_TEMPERATURE[phase - 1] -= .1
+        print("Decreased target temperature to:", TARGET_TEMPERATURE[phase - 1])
     elif 20000 <= buttons_adc < 32000:
         # LEFT
         mix = not mix
@@ -163,7 +161,7 @@ while True:
         control_mixer()
         handle_buttons()
         draw_to_lcd(
-            TARGET_TEMPERATURE, 
+            TARGET_TEMPERATURE[phase - 1], 
             measured_temp, 
             phase, 
             array_and(heaters_in_use, heaters_allowed)
