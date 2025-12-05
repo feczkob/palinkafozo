@@ -1,0 +1,26 @@
+import machine
+import lcd_4bit_mode
+import onewire
+import ds18x20
+
+# LCD Power Pins
+RS = machine.Pin(4,machine.Pin.OUT)
+ENABLE = machine.Pin(5,machine.Pin.OUT)
+BACK_LIGHT = machine.Pin(6,machine.Pin.OUT)
+D4 = machine.Pin(0,machine.Pin.OUT)
+D5 = machine.Pin(1,machine.Pin.OUT)
+D6 = machine.Pin(2,machine.Pin.OUT)
+D7 = machine.Pin(3,machine.Pin.OUT)
+HEATER_1 = machine.Pin(7,machine.Pin.OUT)
+HEATER_2 = machine.Pin(8,machine.Pin.OUT)
+HEATER_3 = machine.Pin(9,machine.Pin.OUT)
+TEMPERATURE_PIN = machine.Pin(10)
+DS_SENSOR = ds18x20.DS18X20(onewire.OneWire(TEMPERATURE_PIN))
+BUTTONS_PIN = machine.Pin(26, machine.Pin.IN, machine.Pin.PULL_UP)
+BUTTONS_PIN_ADC = machine.ADC(BUTTONS_PIN)
+
+display = lcd_4bit_mode.LCD16x2(RS,ENABLE,BACK_LIGHT,D4,D5,D6,D7)
+
+triangle = [0b11111,0b10001,0b10001,0b10001,0b10001,0b10001,0b10001,0b11111]
+
+# Pins connected to buttons
