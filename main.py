@@ -9,7 +9,7 @@ measured_temp: float = 0.0
 phase = 1
 mix = True
 heaters_in_use = [False, False, False]
-heaters_allowed = [True, True, True]
+heaters_enabled = [True, True, True]
 HEATER_1.off()
 HEATER_2.off()
 HEATER_3.off()
@@ -23,7 +23,7 @@ screen_target_temp = 0.0
 screen_measured_temp = measured_temp
 screen_phase = phase
 screen_mix = mix
-screen_heaters_allowed = heaters_allowed.copy()
+screen_heaters_enabled = heaters_enabled.copy()
 screen_heaters_in_use = heaters_in_use.copy()
 
 # Initialize LCD
@@ -50,9 +50,9 @@ def control_heaters():
     global heaters_in_use, measured_temp, TARGET_TEMPERATURE
     if measured_temp < TARGET_TEMPERATURE[phase - 1]:
         heaters_in_use = [True, True, True]
-        HEATER_1.value(heaters_in_use[0] & heaters_allowed[0])
-        HEATER_2.value(heaters_in_use[1] & heaters_allowed[1])
-        HEATER_3.value(heaters_in_use[2] & heaters_allowed[2])
+        HEATER_1.value(heaters_in_use[0] & heaters_enabled[0])
+        HEATER_2.value(heaters_in_use[1] & heaters_enabled[1])
+        HEATER_3.value(heaters_in_use[2] & heaters_enabled[2])
     else:
         heaters_in_use = [False, False, False]
         HEATER_1.off()
@@ -66,14 +66,14 @@ def control_mixer():
     else:
         MIXER_PIN.off() 
         
-def draw_to_lcd(target_temp, measured_temp, phase, heaters_allowed, heaters_in_use):
-    global screen_target_temp, screen_measured_temp, screen_phase, screen_mix, screen_heaters_in_use, screen_heaters_allowed
+def draw_to_lcd(target_temp, measured_temp, phase, heaters_enabled, heaters_in_use):
+    global screen_target_temp, screen_measured_temp, screen_phase, screen_mix, screen_heaters_in_use, screen_heaters_enabled
 
     if (round(screen_target_temp, 1) == round(target_temp, 1) and
         round(screen_measured_temp, 1) == round(measured_temp, 1) and
         screen_phase == phase and
         screen_mix == mix and
-        screen_heaters_allowed == heaters_allowed and
+        screen_heaters_enabled == heaters_enabled and
         screen_heaters_in_use == heaters_in_use):
         return  # No changes, skip updating the display
     
@@ -82,7 +82,7 @@ def draw_to_lcd(target_temp, measured_temp, phase, heaters_allowed, heaters_in_u
     screen_phase = phase
     screen_mix = mix
     screen_heaters_in_use = heaters_in_use.copy()
-    screen_heaters_allowed = heaters_allowed.copy()
+    screen_heaters_enabled = heaters_enabled.copy()
     
     display.ClearScreenCursorHome()
     display.WriteLine(f"  {round(screen_target_temp, 1)}C    {round(screen_measured_temp, 1)}C", 1)
@@ -106,26 +106,26 @@ def draw_to_lcd(target_temp, measured_temp, phase, heaters_allowed, heaters_in_u
     # Heater icon
     display.DrawCustomChar(line_number=2, col=13, slot=4)
     # Heaters on/off
-    if(heaters_allowed[0]): 
+    if(heaters_enabled[0]): 
         if (heaters_in_use[0]): display.DrawCustomChar(line_number=2, col=14, slot=3)
         else: display.DrawCustomChar(line_number=2, col=14, slot=0)
-    if(heaters_allowed[1]): 
+    if(heaters_enabled[1]): 
         if (heaters_in_use[1]): display.DrawCustomChar(line_number=2, col=15, slot=3)
         else: display.DrawCustomChar(line_number=2, col=15, slot=0)
-    if(heaters_allowed[2]): 
+    if(heaters_enabled[2]): 
         if (heaters_in_use[2]): display.DrawCustomChar(line_number=2, col=16, slot=3)
         else: display.DrawCustomChar(line_number=2, col=16, slot=0)
 
 def handle_buttons():
-    global TARGET_TEMPERATURE, buttons_adc, phase, mix, heaters_allowed
+    global TARGET_TEMPERATURE, buttons_adc, phase, mix, heaters_enabled
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
     if 200 <= buttons_adc < 6000:
         # RIGHT
-        if(sum(heaters_allowed) == 3): 
-            heaters_allowed = [False, False, False]
+        if(sum(heaters_enabled) == 3): 
+            heaters_enabled = [False, False, False]
             sleep(0.3)  # Simple debounce
             return
-        heaters_allowed[sum(heaters_allowed)] = True
+        heaters_enabled[sum(heaters_enabled)] = True
         sleep(0.3)  # Simple debounce
     elif 6000 <= buttons_adc < 14000:
         # UP
@@ -157,7 +157,7 @@ while True:
             TARGET_TEMPERATURE[phase - 1], 
             measured_temp, 
             phase, 
-            heaters_allowed,
+            heaters_enabled,
             heaters_in_use, 
         )
         sleep(0.1)
