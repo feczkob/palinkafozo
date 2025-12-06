@@ -19,11 +19,10 @@ MIXER_PIN = machine.Pin(11, machine.Pin.OUT)
 BUTTONS_PIN = machine.Pin(27, machine.Pin.IN)
 BUTTONS_PIN_ADC = machine.ADC(BUTTONS_PIN)
 
-# TODO: actual values
-TARGET_PHASE_1 = 79.0
+TARGET_PHASE_1 = 78.0
 TARGET_PHASE_2 = 81.0
 TARGET_PHASE_3 = 83.0
-TARGET_PHASE_4 = 85.0
+TARGET_PHASE_4 = 90.0
 TARGET_TEMPERATURE = [TARGET_PHASE_1, TARGET_PHASE_2, TARGET_PHASE_3, TARGET_PHASE_4]
 
 display = lcd_4bit_mode.LCD16x2(RS,ENABLE,BACK_LIGHT,D4,D5,D6,D7)
@@ -91,14 +90,14 @@ CHAR_HEATER_ON = [
 
 # Mix ON icon (rotating arrows)
 CHAR_MIX_ON = [
-    0b00100,
+    0b00000,
     0b01110,
     0b11111,
     0b11111,
     0b11111,
     0b11111,
     0b01110,
-    0b00100
+    0b00000
 ]
 
 # Mix OFF icon (static)

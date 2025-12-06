@@ -14,9 +14,8 @@ HEATER_1.off()
 HEATER_2.off()
 HEATER_3.off()
 
+# Sensors
 buttons_adc = 0
-debounce_time = 0
-
 roms = DS_SENSOR.scan()
 
 # Screen state
@@ -25,6 +24,17 @@ screen_measured_temp = measured_temp
 screen_phase = phase
 screen_mix = mix
 screen_heater_status = heaters_in_use.copy()
+
+# Initialize LCD
+display.BackLightOn()
+display.CreateChar(slot=0, bitmap=CHAR_MIX)
+display.CreateChar(slot=1, bitmap=CHAR_TARGET)
+display.CreateChar(slot=2, bitmap=CHAR_THERMOMETER)
+display.CreateChar(slot=3, bitmap=CHAR_HEATER_ON)
+display.CreateChar(slot=4, bitmap=CHAR_HEATER)
+display.CreateChar(slot=5, bitmap=CHAR_PHASE)
+display.CreateChar(slot=6, bitmap=CHAR_MIX_ON)
+display.CreateChar(slot=7, bitmap=CHAR_MIX_OFF)
 
 def measure_temperature():   
     # TODO set precision?
@@ -56,7 +66,6 @@ def control_mixer():
         MIXER_PIN.off() 
         
 def draw_to_lcd(target_temp, measured_temp, phase, heaters):
-    # TODO: store the screen state locally and only update if something changes
     global screen_target_temp, screen_measured_temp, screen_phase, screen_mix, screen_heater_status
     
     if (screen_target_temp == target_temp and
@@ -127,16 +136,6 @@ def handle_buttons():
 def array_and(b1, b2):
     return [a and b for a, b in zip(b1, b2)]
 
-display.BackLightOn()
-# Load custom glyph (slot 0) once at startup
-display.CreateChar(slot=0, bitmap=CHAR_MIX)
-display.CreateChar(slot=1, bitmap=CHAR_TARGET)
-display.CreateChar(slot=2, bitmap=CHAR_THERMOMETER)
-display.CreateChar(slot=3, bitmap=CHAR_HEATER_ON)
-display.CreateChar(slot=4, bitmap=CHAR_HEATER)
-display.CreateChar(slot=5, bitmap=CHAR_PHASE)
-display.CreateChar(slot=6, bitmap=CHAR_MIX_ON)
-display.CreateChar(slot=7, bitmap=CHAR_MIX_OFF)
 while True:
     try:
         measure_temperature()
