@@ -77,15 +77,26 @@ CHAR_HEATER = [
     0b11111,
 ]
 
-CHAR_HEATER_ON = [
+CHAR_HEATER_ENABLED_OFF = [
     0b00000,
-    0b01010,
+    0b00000,
+    0b00000,
+    0b00000,
+    0b00000,
+    0b00000,
     0b11111,
+    0b11111,
+]
+
+CHAR_HEATER_ENABLED_ON = [
+    0b01010,
     0b10101,
     0b00000,
     0b01010,
-    0b11111,
     0b10101,
+    0b00000,
+    0b11111,
+    0b11111,
 ]
 
 # Mix ON icon (rotating arrows)
