@@ -1,13 +1,11 @@
-from machine import Pin
 from utime import sleep
 from constants import *
-import time
 
 
 # Program state
 measured_temp: float = 0.0
 phase = 1
-mix = True
+mix = False
 heaters_in_use = [False, False, False]
 heaters_enabled = [True, True, True]
 HEATER_1.off()
@@ -33,7 +31,7 @@ display.CreateChar(slot=1, bitmap=CHAR_TARGET)
 display.CreateChar(slot=2, bitmap=CHAR_THERMOMETER)
 display.CreateChar(slot=3, bitmap=CHAR_HEATER_ENABLED_ON)
 display.CreateChar(slot=4, bitmap=CHAR_HEATER)
-# slot 5 will be used for phase and mix icons
+display.CreateChar(slot=5, bitmap=CHAR_MIX)
 display.CreateChar(slot=6, bitmap=CHAR_MIX_ON)
 display.CreateChar(slot=7, bitmap=CHAR_MIX_OFF)
 
@@ -91,12 +89,8 @@ def draw_to_lcd(target_temp, measured_temp, phase, heaters_enabled, heaters_in_u
     # Measured temperature
     display.DrawCustomChar(line_number=1, col=10, slot=2)
     
-    display.WriteLine(f" {screen_phase}", 2)
-    # Phase icon
-    display.CreateChar(slot=5, bitmap=CHAR_PHASE)
-    display.DrawCustomChar(line_number=2, col=0, slot=5)
+    display.WriteLine(f"F{screen_phase}", 2)
     # Mixer icon
-    display.CreateChar(slot=5, bitmap=CHAR_MIX)
     display.DrawCustomChar(line_number=2, col=8, slot=5)
     # Mixer on/off
     if(screen_mix):
@@ -121,11 +115,11 @@ def handle_buttons():
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
     if 200 <= buttons_adc < 6000:
         # RIGHT
-        if(sum(heaters_enabled) == 3): 
-            heaters_enabled = [False, False, False]
+        if(sum(heaters_enabled) == 0): 
+            heaters_enabled = [True, True, True]
             sleep(0.3)  # Simple debounce
             return
-        heaters_enabled[sum(heaters_enabled)] = True
+        heaters_enabled[sum(heaters_enabled) - 1] = False
         sleep(0.3)  # Simple debounce
     elif 6000 <= buttons_adc < 14000:
         # UP
