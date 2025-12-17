@@ -46,6 +46,7 @@ def measure_temperature():
 
 def control_heaters():
     global heaters_in_use, measured_temp, TARGET_TEMPERATURE
+    # TODO: PID controller
     if measured_temp < TARGET_TEMPERATURE[phase - 1]:
         heaters_in_use = [True, True, True]
         HEATER_1.value(heaters_in_use[0] & heaters_enabled[0])
@@ -113,7 +114,9 @@ def draw_to_lcd(target_temp, measured_temp, phase, heaters_enabled, heaters_in_u
 def handle_buttons():
     global TARGET_TEMPERATURE, buttons_adc, phase, mix, heaters_enabled
     buttons_adc = BUTTONS_PIN_ADC.read_u16()
-    if 200 <= buttons_adc < 6000:
+    #print("Buttons ADC value:", buttons_adc)
+    
+    if 200 <= buttons_adc < 5000:
         # RIGHT
         if(sum(heaters_enabled) == 0): 
             heaters_enabled = [True, True, True]
@@ -121,19 +124,19 @@ def handle_buttons():
             return
         heaters_enabled[sum(heaters_enabled) - 1] = False
         sleep(0.3)  # Simple debounce
-    elif 6000 <= buttons_adc < 14000:
+    elif 5000 <= buttons_adc < 11000:
         # UP
         TARGET_TEMPERATURE[phase - 1] += .1
-        print("Increased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
-    elif 14000 <= buttons_adc < 20000:
+        #print("Increased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
+    elif 11000 <= buttons_adc < 17000:
         # DOWN
         TARGET_TEMPERATURE[phase - 1] -= .1
-        print("Decreased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
-    elif 20000 <= buttons_adc < 32000:
+        #print("Decreased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
+    elif 17000 <= buttons_adc < 26000:
         # LEFT
         mix = not mix
         sleep(0.3)  # Simple debounce
-    elif 32000 <= buttons_adc < 40000:
+    elif 26000 <= buttons_adc < 38000:
         # SELECT
         phase = (phase % 4) + 1
         sleep(0.3)  # Simple debounce
