@@ -1,6 +1,4 @@
-
 from constants import TARGET_TEMPERATURE
-
 
 class ProgramState:
     def __init__(self):
@@ -32,11 +30,8 @@ class ProgramState:
     def set_measured_temp(self, temperature: float):
         self.measured_temp = temperature
         
-    def switch_heaters_on(self):
-        self.heaters_in_use = [True, True, True]
-        
-    def switch_heaters_off(self):
-        self.heaters_in_use = [False, False, False]
+    def switch_heaters(self, states: list[bool]):
+        self.heaters_in_use = states
         
     def calculate_heater_state(self, index: int) -> bool:
         if 0 <= index < len(self.heaters_in_use):

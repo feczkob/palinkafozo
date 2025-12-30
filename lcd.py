@@ -1,4 +1,3 @@
-
 from utime import sleep
 from constants import BUTTONS_PIN_ADC, CHAR_HEATER, CHAR_HEATER_ENABLED_OFF, CHAR_HEATER_ENABLED_ON, CHAR_MIX, CHAR_MIX_OFF, CHAR_MIX_ON, CHAR_TARGET, CHAR_THERMOMETER
 from program_state import ProgramState
@@ -37,13 +36,16 @@ class LCD:
         #print("Buttons ADC value:", buttons_adc)
     
         if 200 <= buttons_adc < 5000:
+            pass
             # RIGHT
-            if(sum(state.heaters_enabled) == 0): 
-                state.heaters_enabled = [True, True, True]
-                sleep(0.3)  # Simple debounce
-                return
-            state.heaters_enabled[sum(state.heaters_enabled) - 1] = False
-            sleep(0.3)  # Simple debounce
+            # PID controls it
+            
+            # if(sum(state.heaters_enabled) == 0): 
+            #     state.heaters_enabled = [True, True, True]
+            #     sleep(0.3)  # Simple debounce
+            #     return
+            # state.heaters_enabled[sum(state.heaters_enabled) - 1] = False
+            # sleep(0.3)  # Simple debounce
         elif 5000 <= buttons_adc < 11000:
             # UP
             state.change_target_temp_for_phase_by(0.1)
