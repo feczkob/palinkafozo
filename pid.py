@@ -2,7 +2,7 @@ from constants import CYCLE_TIME_SECONDS
 from program_state import ProgramState
 
 class PidController:
-    def __init__(self, Kp: float = 1.0, Ki: float = 0.1, Kd: float = 0.02):
+    def __init__(self, Kp: float = 0.6, Ki: float = 0.001, Kd: float = 0.002):
         # PID coefficients (to be tuned)
         # https://www.ni.com/en/shop/labview/pid-theory-explained.html
         self.Kp = Kp  # Proportional gain
@@ -12,6 +12,9 @@ class PidController:
         self.pid_last_error = 0.0
         
         self.integral = 0.0
+        
+        # the system is slow, we need to avoid integral windup
+        self.delta_T = 0.2
 
     def calculate_pid_output(self, state: ProgramState) -> float:
         """Calculate PID output based on target and measured temperatures"""
@@ -20,7 +23,10 @@ class PidController:
         
         # Calculate PID output
         proportional = self.Kp * error
-        self.integral += self.Ki * error * CYCLE_TIME_SECONDS
+        if (abs(error) < self.delta_T):
+            self.integral += self.Ki * error * CYCLE_TIME_SECONDS
+        else:
+            self.integral = 0.0  # Reset integral if error is too large
         derivative = self.Kd * (error - self.pid_last_error) / CYCLE_TIME_SECONDS
         
         output = proportional + self.integral + derivative
@@ -39,13 +45,13 @@ class PidController:
         #print("PID output:", pid_output)
         
         # Define thresholds for heater activation
-        if pid_output > 2.0:
+        if pid_output > 0.2:
             # All heaters on for maximum heating
             return [True, True, True]
-        elif pid_output > 1.0:
+        elif pid_output > 0.05:
             # Two heaters on for medium heating
             return [True, True, False]
-        elif pid_output > 0.5:
+        elif pid_output > -0.05:
             # One heater on for gentle heating
             return [True, False, False]
         else:

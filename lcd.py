@@ -35,7 +35,7 @@ class LCD:
         buttons_adc = BUTTONS_PIN_ADC.read_u16()
         #print("Buttons ADC value:", buttons_adc)
     
-        if 200 <= buttons_adc < 5000:
+        if 200 <= buttons_adc < 6000:
             pass
             # RIGHT
             # PID controls it
@@ -46,19 +46,19 @@ class LCD:
             #     return
             # state.heaters_enabled[sum(state.heaters_enabled) - 1] = False
             # sleep(0.3)  # Simple debounce
-        elif 5000 <= buttons_adc < 11000:
+        elif 6000 <= buttons_adc < 14000:
             # UP
             state.change_target_temp_for_phase_by(0.1)
             #print("Increased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
-        elif 11000 <= buttons_adc < 17000:
+        elif 14000 <= buttons_adc < 20000:
             # DOWN
             state.change_target_temp_for_phase_by(-0.1)
             #print("Decreased target temperature to:", round(TARGET_TEMPERATURE[phase - 1], 1))
-        elif 17000 <= buttons_adc < 26000:
+        elif 20000 <= buttons_adc < 32000:
             # LEFT
             state.switch_mix()
             sleep(0.3)  # Simple debounce
-        elif 26000 <= buttons_adc < 38000:
+        elif 32000 <= buttons_adc < 40000:
             # SELECT
             state.switch_phase()
             sleep(0.3)  # Simple debounce
